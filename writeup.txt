@@ -1,0 +1,25 @@
+1. What optimizations did you implement?
+
+
+
+
+
+2. Please explain for each of your partners what their main
+contributions were (e.g., strategy, implementation of which
+components, testing/debugging, etc.)
+
+<person1>: <what they did>
+
+<person2>: <what they did>
+
+...
+
+
+
+3. Please describe how your team decided to split up the tasks.
+
+
+
+
+
+4. Describe a teamwork challenge that your team had and how you resolved it.
