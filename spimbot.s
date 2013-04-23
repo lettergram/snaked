@@ -5,3 +5,193 @@
 ###     Spimbot contest team name: 
 ###
 ###
+.ktext 0x80000180
+interrupt_handler:
+.set noat
+      move      $k1, $at               # Save $at                               
+.set at
+      la      $k0, chunkIH                
+      sw      $a0, 0($k0)              # Get some free registers                  
+      sw      $a1, 4($k0)              # by storing them to a global variable    
+      sw      $v0, 8($k0)  	#store $v0
+      sw      $t0, 12($k0)		#store $t0
+      sw	$t4, 16($k0)
+      sw	$t5, 20($k0)
+      sw	$t6, 24($k0)
+      sw	$t7, 28($k0)
+      sw	$a2, 32($k0)
+      sw	$a3, 36($k0)	 
+
+      mfc0    $k0, $13                 # Get Cause register                       
+      srl     $a0, $k0, 2                
+      and     $a0, $a0, 0xf            # ExcCode field                            
+      bne     $a0, 0, non_intrpt         
+
+interrupt_dispatch:                    # Interrupt:                             
+      mfc0    $k0, $13                 # Get Cause register, again                 
+      beq     $k0, $zero, done         # handled all outstanding interrupts     
+  
+      and     $a0, $k0, 0x1000         # is there a bonk interrupt?                
+      bne     $a0, 0, bonk_interrupt   
+
+      and     $a0, $k0, 0x8000         # is there a timer interrupt?
+      bne     $a0, 0, timer_interrupt
+      
+      and     $a0, $k0, 0x4000		#is there a new apple interrupt?
+      bne     $a0, 0, new_public_apple_interrupt
+      
+
+      
+      #puzzle interrupt
+      #private apple created
+      #get other snake's angle interrupt
+
+                         # add dispatch for other interrupt types here.
+
+      li      $v0, 4                   # Unhandled interrupt types
+
+      la      $a0, unhandled_str
+      syscall 
+      j       done
+
+bonk_interrupt:
+      sw $zero, 0xffff0010($zero) # Forces snake to stop
+      sw $a1, 0xffff0060($zero) # acknowledge interrupt
+
+	j interrupt_dispatch
+
+
+
+new_apple_interrupt:
+      sw      $a1, 0xffff0064($zero)   # acknowledge interrupt
+      #need to save the used registers on the stack
+      
+      
+	lw $t0, HEAD_X
+
+	lw $t1, HEAD_Y
+	lw $a2, APPLE_X
+	lw $a3, APPLE_Y
+	
+	
+	beq $t0, $a2, first_if_public_apple # my_x != apple_x
+	bge $t0, $a2, second_if_public_apple # my_x < apple_x
+	add $t2, $0, 0
+	j public_apple_end # returns 0
+	
+second_if_public_apple: # second if not true
+	add $t2, $0, 180 # inputs 180 for desired angle
+	j public_apple_end # returns 180
+	
+first_if_public_apple:
+	bge $t1, $a3, third_if_public_apple # my_y < apple_y
+	add $t2, $0, 90 # inputs 90 for v0
+	j public_apple_end # returns 90
+	
+third_if_public_apple:
+	add $t2, $0, 270 # inputs 270 into v0
+	j public_apple_end # returns 270
+	
+public_apple_end:
+	
+	lw $t0, prev_angle
+	sub $t0, $t0, $t2
+	li $a2, 180
+	
+	bge $t0, $0, public_apple_less_than_zero
+	sub $t0, $0, $t0
+	
+public_apple_less_than_zero:
+	
+	bne $t0, $a2, public_apple_not_equal_180
+	
+	add $t2, $t2, 90
+	
+	li $t0, 0
+	li $a2, 5000
+	
+public_apple_for_loop:
+	add $t0, $t0, 1
+	bne $t0, $a2, public_apple_for_loop
+	
+public_apple_not_equal_180:
+	
+	bge $t2, $0, public_apple_set_abs_angle # sets abs angle
+	add $t2, $0, $t2
+	
+public_apple_set_abs_angle:
+	
+        sw $t2, 0xffff0014($zero) # Sets angle to proper angle
+	li $t0, 1
+        sw $t0, 0xffff0018($zero) # relative to zero
+	sw $t2, prev_angle
+	
+      j interrupt_dispatch # see if other interrupts are waiting      
+      
+      
+timer_interrupt:
+      sw $a1, 0xffff006c($zero) # acknowledge interrupt
+ 
+	lw $t0, HEAD_X
+	lw $t1, HEAD_Y
+	lw $a2, APPLE_X
+	lw $a3, APPLE_Y
+
+
+	beq $t0, $a2, first_if # my_x != apple_x
+	bge $t0, $a2, second_if # my_x < apple_x
+	add $t2, $0, 0
+	j end # returns 0
+
+second_if: # second if not true
+	add $t2, $0, 180 # inputs 180 for desired angle
+	j end # returns 180
+
+first_if:
+	bge $t1, $a3, third_if # my_y < apple_y
+	add $t2, $0, 90 # inputs 90 for v0
+	j end # returns 90
+
+third_if:
+	add $t2, $0, 270 # inputs 270 into v0
+	j end # returns 270
+
+end:
+
+	lw $t0, prev_angle
+	sub $t0, $t0, $t2
+	li $a2, 180
+
+	bge $t0, $0, less_than_zero
+	sub $t0, $0, $t0
+
+less_than_zero:
+
+	bne $t0, $a2, not_equal_180
+
+	add $t2, $t2, 90
+
+	li $t0, 0
+	li $a2, 5000
+
+for_loop:
+	add $t0, $t0, 1
+	bne $t0, $a2, for_loop
+
+not_equal_180:
+
+	bge $t2, $0, set_abs_angle # sets abs angle
+	add $t2, $0, $t2
+
+set_abs_angle:
+
+        sw $t2, 0xffff0014($zero) # Sets angle to proper angle
+	li $t0, 1
+        sw $t0, 0xffff0018($zero) # relative to zero
+	sw $t2, prev_angle
+
+      lw $v0, 0xffff001c($0) # current time
+      add $v0, $v0, 500
+      sw $v0, 0xffff001c($0) # request timer in 500
+
+      j interrupt_dispatch # see if other interrupts are waiting
