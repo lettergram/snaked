@@ -22,9 +22,9 @@ first_row_column:
 loop1:
 
 	lw      $t3, 4($a1)    			# $t3 = list->data
-    mul     $t4, $v0, 4     		# $t4 = 4 * row
-    add     $t3, $t3, $t4   		# $t3 = &list->data[row]
-    lw      $t3, 0($t3)     		# $t3 = list->data[row], I belive this is [0] as well
+    	mul     $t4, $v0, 4     		# $t4 = 4 * row
+   	 add     $t3, $t3, $t4   		# $t3 = &list->data[row]
+   	 lw      $t3, 0($t3)     		# $t3 = list->data[row], I belive this is [0] as well
 	lb		$t3, 0($t3)				# loading first letter/number
 
 	add		$v1, $v0, 1				# $v1 is the next row, so row = row + 1
@@ -32,9 +32,9 @@ loop1:
 loop2:
 	
 	lw      $t5, 4($a1)    		 	# $t5 = list->data
-    mul     $t6, $v1, 4     		# $t4 = 4 * row
-    add     $t5, $t5, $t6   		# $t5 = &list->data[row]
-    lw      $t5, 0($t5)     		# $t5 = list->data[row], I belive this is [0] as well
+   	mul     $t6, $v1, 4     		# $t4 = 4 * row
+   	add     $t5, $t5, $t6   		# $t5 = &list->data[row]
+    	lw      $t5, 0($t5)     		# $t5 = list->data[row], I belive this is [0] as well
 	lb		$t5, 0($t5)				# loading first letter/number
 
 	beq		$t3, $t5, exit_found
