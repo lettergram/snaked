@@ -149,10 +149,10 @@ main:
         la      $a0, newline
         syscall
 		       
-        la      $a0, blank2		 # matrix
-        la      $a1, list2		 # list
+        la      $a0, blank1		 # matrix
+        la      $a1, list1		 # list
 		jal		first_row_column
-		#jal		next_rows
+		jal		next_rows
         
         li      $v0, 4
         la      $a0, student
