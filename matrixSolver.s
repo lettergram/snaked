@@ -80,7 +80,7 @@ second_loop:
 	lw		$t5, 4($a0)			# loading address of matrix->data
 	lw		$t6, 4($a1)			# loading address of list->data
 
-	add 		$t8, $t4, 4			# $t8 stores j * 4
+	mul 		$t8, $t4, 4			# $t8 stores j * 4
 
 	add 		$t5, $t5, $t8			# obtaining address of matrix->data[j][]
 	lw 		$t5, 0($t5)			# loading address of matrix->data[j][]
@@ -88,9 +88,9 @@ second_loop:
 
 	mul		$t8, $v1, 4			# $t8 stores i * 4
 
-	add 		$t6, $t6, $t8			# obtaining address of list->data[i][]
+	add 	$t6, $t6, $t8		# obtaining address of list->data[i][]
 	lw 		$t6, 0($t6)			# loading address of list->data[i][]
-	add 		$t6, $t6, $t4			# obtaining address of list->data[i][j]
+	add 	$t6, $t6, $t4			# obtaining address of list->data[i][j]
 	lb		$t6, 0($t6)			# loading address of list->data[i][j]
 	
 	sb		$t6, 0($t5)			# sets matrix->data[j][0] = list->data[v1][j] (I think)
